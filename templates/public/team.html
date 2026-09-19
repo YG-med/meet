@@ -1,0 +1,7 @@
+{% extends "public/base.html" %}
+{% block title %}醫療專業治理｜癒見{% endblock %}
+{% block content %}
+<main><section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 醫護專區</div><h1>醫療專業治理</h1><p class="lead">專業不是一句口號，而是可以被看見、被追溯的審閱與利益揭露制度。</p></div></section>
+<section class="section"><div class="wrap team-grid">{% for e in experts %}<div class="role-card">{% if e.image_path %}<div class="avatar"><img src="{{media_url(e.image_path)}}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>{% else %}<div class="avatar">👨‍⚕️</div>{% endif %}<h3>{{e.role_title}}</h3><b>{{e.name}}</b><p>{{e.specialty}}{% if e.organization %}｜{{e.organization}}{% endif %}</p><p>{{e.bio}}</p></div>{% endfor %}</div></section>
+<section class="section alt"><div class="wrap"><h2>內容與商業合作分流</h2><div class="feature-row" style="margin-top:20px"><div class="feature-card"><div class="feature-icon">✓</div><div><h3>審閱獨立</h3><p>合作廠商不能直接決定醫療內容結論。</p></div><div></div></div><div class="feature-card"><div class="feature-icon">◎</div><div><h3>利益揭露</h3><p>贊助內容、合作關係與更新日期清楚標示。</p></div><div></div></div><div class="feature-card"><div class="feature-icon">↕</div><div><h3>排序透明</h3><p>一般照護資源不採「付費就是推薦」的暗黑設計。</p></div><div></div></div></div></div></section></main>
+{% endblock %}

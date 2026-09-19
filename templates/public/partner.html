@@ -1,0 +1,8 @@
+{% extends "public/base.html" %}
+{% block title %}合作洽詢｜癒見{% endblock %}
+{% block content %}
+<main><section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 合作洽詢</div><h1>一起把傷口照護資源串起來</h1><p class="lead">歡迎醫院、診所、居家護理所、醫療專業人員與企業合作。</p></div></section>
+<section class="section alt"><div class="wrap partner-grid"><div><h2>合作方式</h2><div class="resource-panel"><h3>醫院／診所</h3><p>建立照護資源頁、服務項目與未來院所 Profile 認領。</p><h3>居家護理所</h3><p>加入服務區域、到宅換藥與可接受傷口類型資料。</p><h3>醫療專業人員</h3><p>內容審閱、衛教、課程與顧問合作。</p><h3>企業／醫材合作</h3><p>教育專題、論壇、企業健康方案與透明揭露的品牌合作。</p></div></div>
+<form class="partner-form" method="post"><input name="name" required placeholder="姓名"><input name="organization" placeholder="單位 / 公司"><input type="email" name="email" placeholder="Email"><input name="phone" placeholder="電話"><select name="inquiry_type"><option>醫療院所</option><option>居家護理所</option><option>醫療專業人員</option><option>企業／醫材合作</option></select><textarea name="message" placeholder="請簡單說明合作需求"></textarea><button class="header-cta" style="border:0">送出合作需求</button></form>
+</div></section></main>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "public/base.html" %}
+{% block title %}癒見｜慢性傷口照護網{% endblock %}
+{% block content %}
+<main>
+<section class="hero">
+<div class="wrap hero-grid">
+  <div>
+    <div class="kicker">台灣慢性傷口照護入口</div>
+    <h1>傷口一直不好？<br><span class="teal">先找到對的照護資源</span></h1>
+    <p class="lead">癒見協助您快速找到全台醫院、診所與居家護理服務，並提供正確、易懂的傷口照護知識，陪伴您走在復原的每一步。</p>
+    <form class="hero-search" action="/resources" method="get"><input name="q" placeholder="輸入地區、傷口類型或服務項目，例如：板橋 糖尿病足"><button>搜尋</button></form>
+    <div class="quick"><b>快速篩選：</b><a href="/resources?service=糖尿病足"><button type="button">糖尿病足</button></a><a href="/resources?service=壓瘡"><button type="button">壓瘡</button></a><a href="/resources?service=靜脈性潰瘍"><button type="button">靜脈性潰瘍</button></a><a href="/resources?service=術後傷口"><button type="button">術後傷口</button></a><a href="/resources?service=居家換藥"><button type="button">居家換藥</button></a></div>
+  </div>
+  <div class="hero-visual">
+    <div class="taiwan-card"><svg viewBox="0 0 210 300" aria-label="台灣地圖示意"><path d="M114 18 C127 36 134 56 129 76 C126 94 142 107 130 125 C119 142 120 161 110 180 C102 196 99 217 85 234 C75 246 69 264 57 278 C50 284 45 280 47 270 C52 246 60 226 64 204 C68 183 76 166 75 145 C74 125 83 110 86 91 C90 67 91 42 100 23 C104 15 109 12 114 18Z" fill="#80d2cd" stroke="#55bbb4" stroke-width="3"/><circle cx="114" cy="53" r="7" fill="#0d968e"/><circle cx="101" cy="113" r="7" fill="#0d968e"/><circle cx="82" cy="198" r="7" fill="#0d968e"/><circle cx="65" cy="247" r="7" fill="#0d968e"/></svg></div>
+    <div class="float-card fc1"><strong>📍 照護資源導航</strong><small>✓ 就近醫療機構</small><small>✓ 居家護理服務</small><small>✓ 照護專業資源</small></div>
+    <div class="float-card fc2"><strong>📖 傷口知識學習</strong><small>✓ 傷口類型介紹</small><small>✓ 照護步驟教學</small><small>✓ 常見問題解答</small></div>
+    <div class="nurse"><div class="person">👩‍⚕️</div></div>
+    <div class="float-card fc3"><strong>♡ 我們陪伴您</strong><small>找到合適的照護團隊</small><small>一起守護傷口健康</small></div>
+  </div>
+</div>
+</section>
+
+<div class="wrap feature-row">
+  <a class="feature-card" href="/resources"><div class="feature-icon">🏥</div><div><h3>找照護資源</h3><p>搜尋全台醫院、診所、居家護理所與專業資源。</p></div><div class="arrow">›</div></a>
+  <a class="feature-card" href="/navigator"><div class="feature-icon">⌖</div><div><h3>傷口就醫導航</h3><p>透過簡單問答，了解需要注意的傷口警訊與照護方向。</p></div><div class="arrow">›</div></a>
+  <a class="feature-card" href="/knowledge"><div class="feature-icon">📖</div><div><h3>傷口知識庫</h3><p>提供專業、易懂的傷口照護衛教文章。</p></div><div class="arrow">›</div></a>
+</div>
+
+<section class="section alt">
+<div class="wrap two-col">
+  <div class="resource-panel">
+    <div class="section-head"><div><h2>全台傷口照護資源</h2></div><a class="section-link" href="/resources">查看全部 ›</a></div>
+    <div class="tabs"><button class="active">醫院</button><button>診所</button><button>居家護理所</button><button>其他專業資源</button></div>
+    <div class="map-and-cards">
+      <div class="map-box"><svg viewBox="0 0 210 300" aria-label="台灣地圖示意"><path d="M114 18 C127 36 134 56 129 76 C126 94 142 107 130 125 C119 142 120 161 110 180 C102 196 99 217 85 234 C75 246 69 264 57 278 C50 284 45 280 47 270 C52 246 60 226 64 204 C68 183 76 166 75 145 C74 125 83 110 86 91 C90 67 91 42 100 23 C104 15 109 12 114 18Z" fill="#80d2cd" stroke="#55bbb4" stroke-width="3"/><circle cx="114" cy="53" r="7" fill="#0d968e"/><circle cx="101" cy="113" r="7" fill="#0d968e"/><circle cx="82" cy="198" r="7" fill="#0d968e"/><circle cx="65" cy="247" r="7" fill="#0d968e"/></svg><div class="map-caption">↗ 照護資源分布</div></div>
+      <div class="resource-cards">
+        {% for r in resources[:2] %}
+        <a class="resource-card" href="/resources/{{r.slug}}">
+          <div class="resource-img dynamic-resource-img">{% if r.image_path %}<img src="{{media_url(r.image_path)}}" alt="{{r.name}}">{% endif %}</div>
+          <div class="resource-info"><h3>{{r.name}}</h3><p>📍 {{r.city}} {{r.district}}</p><div class="pills">{% for s in r.services.split(',')[:3] %}<span class="pill">{{s}}</span>{% endfor %}</div><div class="mini-meta"><span>{{'已驗證' if r.verified else '資料待驗證'}}</span><span>{{r.type}}</span></div></div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="knowledge-panel">
+    <div class="section-head"><div><h2>熱門傷口照護知識</h2></div><a class="section-link" href="/knowledge">查看全部文章 ›</a></div>
+    <div class="article-grid">
+      {% for a in articles[:4] %}
+      <a class="article-card" href="/knowledge/{{a.slug}}">
+        <div class="article-thumb dynamic-cover">{% if a.cover_image %}<img src="{{media_url(a.cover_image)}}" alt="{{a.title}}">{% else %}{{ ['🦶','🛏','🩹','🧤'][loop.index0] }}{% endif %}</div>
+        <div class="article-body"><h3>{{a.title}}</h3><p>{{a.summary}}</p><span class="tag">{{a.category}}</span></div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap two-col">
+  <div class="assessment-panel">
+    <div class="section-head"><div><h2>我的傷口該找誰？</h2><p>簡單幾個問題，協助您找到合適的照護建議。</p></div></div>
+    <div class="assess-grid">
+      <div>
+        <div class="question"><span>🗓</span><b>傷口多久了？</b><div class="q-options"><a href="/navigator"><button type="button">少於2週</button></a><a href="/navigator"><button type="button">2–4週</button></a><a href="/navigator"><button type="button">超過4週</button></a></div></div>
+        <div class="question"><span>💧</span><b>是否有糖尿病？</b><div class="q-options"><a href="/navigator"><button type="button">是</button></a><a href="/navigator"><button type="button">否</button></a><a href="/navigator"><button type="button">不確定</button></a></div></div>
+        <div class="question"><span>⚠</span><b>是否有紅腫熱痛？</b><div class="q-options"><a href="/navigator"><button type="button">是</button></a><a href="/navigator"><button type="button">否</button></a><a href="/navigator"><button type="button">不確定</button></a></div></div>
+        <div class="question"><span>🛏</span><b>是否臥床？</b><div class="q-options"><a href="/navigator"><button type="button">是</button></a><a href="/navigator"><button type="button">否</button></a><a href="/navigator"><button type="button">不確定</button></a></div></div>
+      </div>
+      <div class="recommend"><div class="shield">♢</div><strong>建議：先做完整傷口導航</strong><p>由平台最新設定的題目與風險規則產生照護方向。</p><a class="header-cta" href="/navigator">開始傷口導航</a><br><a class="section-link" style="display:block;margin-top:12px" href="/resources">查看附近資源 ›</a></div>
+    </div>
+  </div>
+
+  <div class="experts-panel">
+    <div class="section-head"><div><h2>專業醫療顧問與合作院所</h2></div><a class="section-link" href="/team">查看團隊 ›</a></div>
+    <div class="expert-grid">
+      {% for e in experts[:2] %}
+      <div class="expert-card"><b>{{e.role_title}}</b><div class="avatar">{% if e.image_path %}<img src="{{media_url(e.image_path)}}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">{% else %}{{'👨‍⚕️' if loop.index==1 else '👩‍⚕️'}}{% endif %}</div><strong>{{e.name}}</strong><small>{{e.specialty}}</small></div>
+      {% endfor %}
+      <div class="expert-card"><b>合作醫療團隊</b><div class="avatar">🏥</div><strong>Care Network</strong><small>醫院、診所與居護所</small></div>
+    </div>
+    <div class="trustline">♢ 中立平台 ｜ 衛教內容經專業審閱 ｜ 不取代醫師診斷</div>
+  </div>
+</div>
+</section>
+
+<section class="section alt">
+<div class="wrap">
+  <div class="section-head"><div><h2>居家護理與出院後照護</h2><p>提供居家換藥、壓瘡照護與長期追蹤資源，讓照護延續到家。</p></div><a class="section-link" href="/resources?type=居家護理所">查看居護資源 ›</a></div>
+  <div class="homecare-list">
+    {% set home_count = namespace(value=0) %}
+    {% for r in resources if r.type == '居家護理所' %}
+      {% if home_count.value < 2 %}
+      <a class="home-card" href="/resources/{{r.slug}}"><div class="home-icon">🏠</div><div><h3>{{r.name}}</h3><p>{{r.city}} {{r.district}}｜{{r.services}}</p><div class="pills">{% for s in r.services.split(',')[:3] %}<span class="pill">{{s}}</span>{% endfor %}</div></div><span class="arrow">›</span></a>
+      {% set home_count.value = home_count.value + 1 %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+</section>
+</main>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{site_settings.site_name}}{% endblock %}</title>
+<meta name="description" content="{% block description %}癒見慢性傷口照護網，提供傷口照護知識、就醫導航、醫院診所與居家護理資源搜尋。{% endblock %}">
+<link rel="icon" href="{{url_for('static',filename='img/favicon.png')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/site.css')}}">
+{% if site_settings.ga4_id %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{site_settings.ga4_id}}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{site_settings.ga4_id}}');</script>
+{% endif %}
+{% block head %}{% endblock %}
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><img src="{{url_for('static',filename='img/yujian-logo.png')}}" alt="癒見 慢性傷口照護網"></a>
+    <nav class="navlinks">
+      <a href="/resources">找照護資源</a>
+      <a href="/knowledge">傷口知識庫</a>
+      <a href="/navigator">傷口就醫導航</a>
+      <a href="/resources?type=居家護理所">居家護理</a>
+      <a href="/team">醫護專區</a>
+      <a href="/partner">登入／訂閱</a>
+    </nav>
+    <a class="header-cta" href="/resources">立即找資源</a>
+    <button class="mobile">☰</button>
+  </div>
+</header>
+{% with messages=get_flashed_messages(with_categories=true) %}
+{% if messages %}<div class="wrap flash-wrap">{% for cat,msg in messages %}<div class="flash {{cat}}">{{msg}}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+<section class="subscribe">
+  <div class="wrap subscribe-row">
+    <div class="sub-left"><div class="envelope">✉</div><div><h2>免費訂閱傷口照護電子報</h2><p>每月精選衛教文章、照護新知與活動資訊，陪伴您與家人一起掌握傷口照護重點。</p></div></div>
+    <form class="sub-form" method="post" action="/subscribe"><input type="hidden" name="source" value="footer"><input type="email" name="email" required placeholder="請輸入您的電子郵件"><button>立即訂閱</button></form>
+  </div>
+</section>
+<footer>
+  <div class="wrap footer-row">
+    <div class="footer-links"><a href="/about">關於我們</a><a href="/partner">合作洽詢</a><a href="/about">隱私權政策</a><a href="/about">免責聲明</a><a href="/partner">聯絡我們</a></div>
+    <div class="social"><span>f</span><span>LINE</span></div>
+  </div>
+  <div class="wrap disclaimer">本平台提供一般衛教資訊與照護資源整理，不作為醫療診斷或治療依據。</div>
+</footer>
+</body>
+</html>

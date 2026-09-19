@@ -1,0 +1,16 @@
+{% extends "public/base.html" %}
+{% block title %}傷口就醫導航｜癒見{% endblock %}
+{% block content %}
+<main>
+<section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 傷口就醫導航</div><h1>傷口就醫導航</h1><p class="lead">透過簡單問題辨識可能需要優先處理的警訊。這不是診斷工具，也不取代醫療人員判斷。</p></div></section>
+<section class="section alt"><div class="wrap" style="max-width:850px">
+<form class="navigator-form" method="post">
+{% for q in questions %}
+<div class="navigator-question"><h3>{{loop.index}}. {{q.question}}</h3>{% if q.help_text %}<p>{{q.help_text}}</p>{% endif %}{% for o in opts[q.id] %}<label><input type="radio" name="q_{{q.id}}" value="{{o.id}}" required> {{o.label}}</label>{% endfor %}</div>
+{% endfor %}
+<button class="header-cta" style="border:0">產生照護建議</button>
+</form>
+{% if result %}<div class="result-panel {{result[0]}}"><h3>{{result[1]}}</h3><p>{{result[2]}}</p><a class="header-cta" href="/resources">查看附近資源</a></div>{% endif %}
+</div></section>
+</main>
+{% endblock %}

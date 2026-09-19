@@ -1,0 +1,19 @@
+{% extends "public/base.html" %}
+{% block title %}{{r.name}}｜癒見{% endblock %}
+{% block description %}{{r.description}}{% endblock %}
+{% block head %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"MedicalOrganization","name":{{r.name|tojson}},"address":{{r.address|tojson}},"telephone":{{r.phone|tojson}}}</script>{% endblock %}
+{% block content %}
+<main>
+<section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 找照護資源 / {{r.name}}</div><span class="pill">{{r.type}}</span><h1>{{r.name}}</h1><p class="lead">{{r.description}}</p></div></section>
+<section class="section"><div class="wrap resource-detail-grid">
+  <div class="detail-panel">
+    <div class="detail-image">{% if r.image_path %}<img src="{{media_url(r.image_path)}}" alt="{{r.name}}">{% else %}🏥{% endif %}</div>
+    <h2>服務資訊</h2>
+    <div class="detail-list"><div>📍 {{r.address or (r.city ~ ' ' ~ r.district)}}</div><div>☎ {{r.phone or '請洽院所'}}</div>{% if r.email %}<div>✉ {{r.email}}</div>{% endif %}<div>🕒 {{r.service_hours or '請洽院所確認'}}</div>{% if r.service_area %}<div>🏠 居護服務區域：{{r.service_area}}</div>{% endif %}</div>
+    <h3 style="margin-top:20px">傷口服務</h3><div class="pills">{% for s in services %}<span class="pill">{{s}}</span>{% endfor %}</div>
+    <p class="mini-meta" style="margin-top:18px"><span>{{'✓ 已驗證' if r.verified else '資料尚未驗證'}}</span><span>更新：{{r.updated_at}}</span></p>
+  </div>
+  <aside class="detail-panel"><h2>下一步</h2><div class="detail-actions">{% if r.phone %}<a class="header-cta" href="tel:{{r.phone}}">電話聯絡</a>{% endif %}{% if r.booking_url %}<a class="btn" href="{{r.booking_url}}" target="_blank">線上預約</a>{% endif %}{% if r.website %}<a class="btn" href="{{r.website}}" target="_blank">官方網站</a>{% endif %}<a class="btn" href="/navigator">先做傷口導航</a><a class="btn" href="/resources">查看其他資源</a></div></aside>
+</div></section>
+</main>
+{% endblock %}

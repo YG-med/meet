@@ -1,0 +1,24 @@
+{% extends "public/base.html" %}
+{% block title %}找照護資源｜癒見{% endblock %}
+{% block content %}
+<main>
+<section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 找照護資源</div><h1>找照護資源</h1><p class="lead">依地區、類型與傷口服務項目搜尋醫院、診所與居家護理所。</p></div></section>
+<section class="section alt"><div class="wrap">
+<form class="filters" method="get">
+  <input name="q" value="{{q}}" placeholder="搜尋院所、地區或服務">
+  <select name="city"><option value="">全部地區</option>{% for c in ['台北市','新北市','桃園市','台中市','高雄市'] %}<option {% if city==c %}selected{% endif %}>{{c}}</option>{% endfor %}</select>
+  <select name="type"><option value="">全部類型</option>{% for t in ['醫院','診所','居家護理所','其他專業資源'] %}<option {% if type_==t %}selected{% endif %}>{{t}}</option>{% endfor %}</select>
+  <input name="service" value="{{service}}" placeholder="服務，例如：糖尿病足">
+  <button class="header-cta" style="border:0">搜尋</button>
+</form>
+<div class="resource-list">
+{% for r in rows %}
+<a class="big-resource" href="/resources/{{r.slug}}">
+  <div class="resource-img dynamic-resource-img">{% if r.image_path %}<img src="{{media_url(r.image_path)}}" alt="{{r.name}}">{% endif %}</div>
+  <div class="resource-info"><span class="pill">{{r.type}}</span><h3>{{r.name}}</h3><p>📍 {{r.city}} {{r.district}}</p><div class="pills">{% for s in r.services.split(',') %}<span class="pill">{{s}}</span>{% endfor %}</div><div class="mini-meta"><span>{{'已驗證' if r.verified else '資料待驗證'}}</span><span>{{r.service_hours or '請洽院所確認'}}</span></div></div>
+</a>
+{% else %}<p>目前沒有符合條件的資源。</p>{% endfor %}
+</div>
+</div></section>
+</main>
+{% endblock %}

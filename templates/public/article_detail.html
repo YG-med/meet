@@ -1,0 +1,8 @@
+{% extends "public/base.html" %}
+{% block title %}{{a.meta_title or a.title}}{% endblock %}
+{% block description %}{{a.meta_description or a.summary}}{% endblock %}
+{% block head %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":{{a.title|tojson}},"dateModified":{{a.updated_at|tojson}}}</script>{% endblock %}
+{% block content %}
+<main><section class="page-hero"><div class="article-page"><div class="breadcrumb">首頁 / 傷口知識庫 / {{a.category}}</div><span class="pill">{{a.category}}</span>{% if a.sponsored %}<span class="pill">贊助內容</span>{% endif %}<h1>{{a.title}}</h1><p class="lead">{{a.summary}}</p><div class="article-note">內容製作：{{a.author}} ｜ 醫療審閱：{{a.reviewer or '待指派'}} ｜ 最後更新：{{a.updated_at[:10]}}</div></div></section>
+<section class="section"><article class="article-page"><div class="article-body">{{a.body|safe}}</div><h2>參考與更新</h2><p>{{a.references_text}}</p><h2>利益揭露</h2><p>{{a.conflict_disclosure or '無'}}</p><p><a class="header-cta" href="/resources">找附近照護資源</a></p></article></section></main>
+{% endblock %}

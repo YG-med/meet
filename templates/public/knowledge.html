@@ -1,0 +1,15 @@
+{% extends "public/base.html" %}
+{% block title %}傷口知識庫｜癒見{% endblock %}
+{% block content %}
+<main>
+<section class="page-hero"><div class="wrap"><div class="breadcrumb">首頁 / 傷口知識庫</div><h1>傷口知識庫</h1><p class="lead">用一般人真正會搜尋的問題，建立醫療專業審閱的傷口衛教內容。</p></div></section>
+<section class="section"><div class="wrap">
+<div class="quick" style="margin-bottom:20px"><b>主題：</b><a href="/knowledge"><button type="button">全部</button></a>{% for c in cats %}<a href="/knowledge?category={{c.category}}"><button type="button">{{c.category}}</button></a>{% endfor %}</div>
+<div class="article-list">
+{% for a in rows %}
+<a class="article-big" href="/knowledge/{{a.slug}}"><div class="article-thumb dynamic-cover">{% if a.cover_image %}<img src="{{media_url(a.cover_image)}}" alt="{{a.title}}">{% else %}🩹{% endif %}</div><div class="article-body"><span class="tag">{{a.category}}</span>{% if a.sponsored %}<span class="tag">贊助內容</span>{% endif %}<h3>{{a.title}}</h3><p>{{a.summary}}</p><div class="mini-meta"><span>醫療審閱：{{a.reviewer or '待指派'}}</span><span>更新 {{a.updated_at[:10]}}</span></div><span class="section-link">閱讀文章 ›</span></div></a>
+{% endfor %}
+</div>
+</div></section>
+</main>
+{% endblock %}
