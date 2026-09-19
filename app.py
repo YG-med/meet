@@ -1,8 +1,9 @@
 import os, re, csv, io, secrets, json
 from pathlib import Path
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, Response, jsonify, g
 import hashlib
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from db import get_db
 from storage import storage_configured, upload_filestorage
@@ -113,6 +114,99 @@ def audit(action,entity_type="",entity_id=None,detail=""):
     con.execute("INSERT INTO audit_logs(user_id,username,action,entity_type,entity_id,detail) VALUES (?,?,?,?,?,?)",
                 (session.get("user_id"),session.get("username",""),action,entity_type,entity_id,detail))
     con.commit();con.close()
+
+# ---------------- Anonymous traffic analytics ----------------
+# Uses a random first-party visitor cookie. Raw IP addresses are intentionally not stored.
+TRAFFIC_COOKIE = "yujian_vid"
+TRAFFIC_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+BOT_RE = re.compile(r"bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegrambot|uptimerobot|monitoring", re.I)
+
+def _should_track_request():
+    if request.method != "GET":
+        return False
+    path = request.path or "/"
+    if path.startswith(("/admin", "/static/")):
+        return False
+    if path in {"/healthz", "/robots.txt", "/sitemap.xml", "/favicon.ico"}:
+        return False
+    ua = request.headers.get("User-Agent", "")
+    if not ua or BOT_RE.search(ua):
+        return False
+    return True
+
+@app.before_request
+def prepare_traffic_tracking():
+    if not _should_track_request():
+        return
+    visitor_id = request.cookies.get(TRAFFIC_COOKIE, "").strip()
+    if not visitor_id or len(visitor_id) > 100:
+        visitor_id = secrets.token_urlsafe(18)
+        g._set_traffic_cookie = True
+    g._traffic_visitor_id = visitor_id
+
+@app.after_request
+def record_traffic(response):
+    visitor_id = getattr(g, "_traffic_visitor_id", None)
+    if visitor_id and 200 <= response.status_code < 400:
+        referrer_host = ""
+        referrer = request.headers.get("Referer", "")
+        if referrer:
+            try:
+                referrer_host = (urlparse(referrer).hostname or "")[:255]
+            except Exception:
+                referrer_host = ""
+        con = None
+        try:
+            con = get_db()
+            con.execute(
+                "INSERT INTO traffic_events(visitor_id,path,referrer_host) VALUES (?,?,?)",
+                (visitor_id, (request.path or "/")[:500], referrer_host),
+            )
+            con.commit()
+        except Exception:
+            # Analytics must never make the public website unavailable.
+            app.logger.exception("Unable to record traffic event")
+        finally:
+            if con is not None:
+                try:
+                    con.close()
+                except Exception:
+                    pass
+
+    if visitor_id and getattr(g, "_set_traffic_cookie", False):
+        response.set_cookie(
+            TRAFFIC_COOKIE,
+            visitor_id,
+            max_age=TRAFFIC_COOKIE_MAX_AGE,
+            httponly=True,
+            secure=bool(os.getenv("RENDER")) or request.is_secure,
+            samesite="Lax",
+        )
+    return response
+
+def traffic_summary(con):
+    today = con.execute("""
+        SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views
+        FROM traffic_events
+        WHERE timezone('Asia/Taipei', viewed_at)::date = timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date
+    """).fetchone()
+    week = con.execute("""
+        SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views
+        FROM traffic_events
+        WHERE timezone('Asia/Taipei', viewed_at)::date >= timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date - 6
+    """).fetchone()
+    month = con.execute("""
+        SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views
+        FROM traffic_events
+        WHERE timezone('Asia/Taipei', viewed_at)::date >= timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date - 29
+    """).fetchone()
+    total = con.execute("SELECT COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views FROM traffic_events").fetchone()
+    return {
+        "today_visitors": today[0], "today_views": today[1],
+        "week_visitors": week[0], "week_views": week[1],
+        "month_visitors": month[0], "month_views": month[1],
+        "total_visitors": total[0], "total_views": total[1],
+    }
 
 @app.get("/healthz")
 def healthz():
@@ -279,9 +373,57 @@ def admin_dashboard():
       "inquiries":con.execute("SELECT COUNT(*) FROM partner_inquiries WHERE status='new'").fetchone()[0],
       "subscribers":con.execute("SELECT COUNT(*) FROM subscribers WHERE active=1").fetchone()[0],
     }
+    traffic=traffic_summary(con)
     recent=con.execute("SELECT * FROM audit_logs ORDER BY id DESC LIMIT 10").fetchall()
     con.close()
-    return render_template("admin/dashboard.html",counts=counts,recent=recent)
+    return render_template("admin/dashboard.html",counts=counts,traffic=traffic,recent=recent)
+
+
+@app.route("/admin/analytics")
+@login_required
+def admin_analytics():
+    con=get_db()
+    summary=traffic_summary(con)
+    daily=con.execute("""
+        WITH days AS (
+          SELECT generate_series(
+            timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date - 13,
+            timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date,
+            interval '1 day'
+          )::date AS day
+        )
+        SELECT to_char(days.day,'MM/DD') AS day_label,
+               COUNT(DISTINCT t.visitor_id) AS visitors,
+               COUNT(t.id) AS views
+        FROM days
+        LEFT JOIN traffic_events t
+          ON timezone('Asia/Taipei', t.viewed_at)::date = days.day
+        GROUP BY days.day
+        ORDER BY days.day
+    """).fetchall()
+    top_pages=con.execute("""
+        SELECT path, COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views
+        FROM traffic_events
+        WHERE timezone('Asia/Taipei', viewed_at)::date >= timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date - 29
+        GROUP BY path
+        ORDER BY views DESC, visitors DESC
+        LIMIT 12
+    """).fetchall()
+    sources=con.execute("""
+        SELECT CASE WHEN referrer_host='' THEN '直接進入／未知' ELSE referrer_host END AS source,
+               COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS views
+        FROM traffic_events
+        WHERE timezone('Asia/Taipei', viewed_at)::date >= timezone('Asia/Taipei', CURRENT_TIMESTAMP)::date - 29
+        GROUP BY 1
+        ORDER BY visitors DESC, views DESC
+        LIMIT 10
+    """).fetchall()
+    con.close()
+    max_daily_views=max([r["views"] for r in daily] or [1]) or 1
+    return render_template(
+        "admin/analytics.html",
+        summary=summary, daily=daily, top_pages=top_pages, sources=sources, max_daily_views=max_daily_views
+    )
 
 # ---------------- Resources CRUD ----------------
 @app.route("/admin/resources")

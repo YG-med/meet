@@ -106,3 +106,11 @@ python app.py
 ```
 
 瀏覽：http://127.0.0.1:5000
+
+
+## v5：後台網站流量統計
+- 自動記錄公開頁面的瀏覽事件。
+- 後台 `/admin` 顯示今日、近 7 日、近 30 日與累計匿名訪客。
+- `/admin/analytics` 提供 14 天趨勢、熱門頁面與來源。
+- 不儲存原始 IP；以第一方隨機 Cookie `yujian_vid` 做匿名訪客去重。
+- 每次 Render 部署會執行 `init_db.py`，既有 Supabase 會自動新增 `traffic_events` 表與索引，不會刪除原資料。

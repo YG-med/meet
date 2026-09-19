@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block title %}流量統計｜癒見 CMS{% endblock %}
+{% block content %}
+<div class="page-title"><div><h1>網站流量統計</h1><div class="help">匿名第一方 Cookie 統計，不儲存原始 IP；日期以台灣時間計算。</div></div></div>
+
+<div class="cards traffic-cards">
+  <div class="metric accent"><span>今日訪客</span><b>{{summary.today_visitors}}</b><small>{{summary.today_views}} 次瀏覽</small></div>
+  <div class="metric"><span>近 7 日訪客</span><b>{{summary.week_visitors}}</b><small>{{summary.week_views}} 次瀏覽</small></div>
+  <div class="metric"><span>近 30 日訪客</span><b>{{summary.month_visitors}}</b><small>{{summary.month_views}} 次瀏覽</small></div>
+  <div class="metric"><span>累計訪客</span><b>{{summary.total_visitors}}</b><small>{{summary.total_views}} 次瀏覽</small></div>
+</div>
+
+<div class="panel" style="margin-top:18px">
+  <div class="section-head"><h3>最近 14 天趨勢</h3><span class="help">深色＝訪客；背景長條＝瀏覽量</span></div>
+  <div class="traffic-chart">
+    {% for r in daily %}
+    <div class="traffic-row">
+      <div class="traffic-day">{{r.day_label}}</div>
+      <div class="traffic-track"><div class="traffic-bar" style="width:{{ ((r.views / max_daily_views) * 100)|round(1) }}%"></div></div>
+      <div class="traffic-value"><b>{{r.visitors}}</b> 人 / {{r.views}} 次</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="analytics-grid">
+  <div class="panel">
+    <h3>近 30 天熱門頁面</h3>
+    <table class="table compact"><tr><th>頁面</th><th>訪客</th><th>瀏覽</th></tr>
+      {% for r in top_pages %}<tr><td><code>{{r.path}}</code></td><td>{{r.visitors}}</td><td>{{r.views}}</td></tr>{% else %}<tr><td colspan="3">尚無流量資料</td></tr>{% endfor %}
+    </table>
+  </div>
+  <div class="panel">
+    <h3>近 30 天來源</h3>
+    <table class="table compact"><tr><th>來源</th><th>訪客</th><th>瀏覽</th></tr>
+      {% for r in sources %}<tr><td>{{r.source}}</td><td>{{r.visitors}}</td><td>{{r.views}}</td></tr>{% else %}<tr><td colspan="3">尚無來源資料</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="panel note-panel">
+  <b>統計口徑</b>
+  <p class="help">「訪客」以瀏覽器中的隨機匿名 ID 去重；同一人清除 Cookie、換瀏覽器或換裝置時會重新計為一位。管理後台、靜態檔案、健康檢查與常見機器人流量不納入。</p>
+</div>
+{% endblock %}
