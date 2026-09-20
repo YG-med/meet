@@ -18,6 +18,30 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY","dev-yujian-change-this")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
+@app.template_filter("date_ymd")
+def date_ymd(value):
+    """Render PostgreSQL datetime/date values and legacy text dates as YYYY-MM-DD."""
+    if value is None:
+        return ""
+    if hasattr(value, "strftime"):
+        try:
+            return value.strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    return str(value)[:10]
+
+@app.template_filter("iso_datetime")
+def iso_datetime(value):
+    """Render datetime values safely for JSON-LD/schema.org."""
+    if value is None:
+        return ""
+    if hasattr(value, "isoformat"):
+        try:
+            return value.isoformat()
+        except Exception:
+            pass
+    return str(value)
+
 ALLOWED_EXT = {"png","jpg","jpeg","webp"}
 
 def generate_password_hash(password):

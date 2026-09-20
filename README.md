@@ -114,3 +114,8 @@ python app.py
 - `/admin/analytics` 提供 14 天趨勢、熱門頁面與來源。
 - 不儲存原始 IP；以第一方隨機 Cookie `yujian_vid` 做匿名訪客去重。
 - 每次 Render 部署會執行 `init_db.py`，既有 Supabase 會自動新增 `traffic_events` 表與索引，不會刪除原資料。
+
+
+## v5.1 hotfix
+- 修正 Supabase/PostgreSQL `TIMESTAMPTZ` 回傳 datetime 導致文章詳情頁 `updated_at[:10]` 發生 500。
+- 新增 `date_ymd` 與 `iso_datetime` Jinja filters，文章詳情與知識庫列表皆相容 PostgreSQL datetime。
